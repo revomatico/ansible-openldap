@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  openldap:
+    image: osixia/openldap:{{ openldap_version }}
+    volumes:
+    - {{ ldap_dir_data }}:/var/lib/ldap
+    - {{ ldap_dir_config }}:/etc/ldap/slapd.d
+    - {{ ldap_dir_certs }}:/container/service/slapd/assets/certs
+    ports:
+    - "{{ ldap_port_plain }}:389"
+    - "{{ ldap_port_ssl }}:636"
+    command:
+    - --copy-service
+    - --loglevel
+    - info
+    restart: always
+    # important: same as hostname
+    domainname: "{{ ansible_host }}"
+    hostname: "{{ ansible_host }}"
+    tty: "true"
+    stdin_open: "true"
+    environment:
+      LDAP_LOG_LEVEL: "{{ ldap_log_level }}"
+
+      LDAP_ORGANISATION: "{{ ldap_organisation }}"
+      LDAP_DOMAIN: "{{ ldap_domain }}"
+      {% set domain_segments = ldap_domain.split('.') -%}
+      LDAP_BASE_DN: "{% for seg in domain_segments %}dc={{ seg }}{% if not loop.last %},{% endif %}{% endfor %}"
+
+      LDAP_ADMIN_PASSWORD: "{{ ldap_pass_admin }}"
+      LDAP_CONFIG_PASSWORD: "{{ ldap_pass_config }}"
+
+      LDAP_TLS_VERIFY_CLIENT: "try"
+      LDAP_TLS: "true"
+      LDAP_TLS_ENFORCE: "true"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
+      LDAP_TLS_CRT_FILENAME: "cert.pem"
+      LDAP_TLS_KEY_FILENAME: "key.pem"
+      #LDAP_TLS_CA_CRT_FILENAME: "ca.pem"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+
+      LDAP_READONLY_USER: "false"
+      #LDAP_READONLY_USER_USERNAME: "readonly"
+      #LDAP_READONLY_USER_PASSWORD: "readonly"
+
+      LDAP_BACKEND: "mdb"
+      LDAP_RFC2307BIS_SCHEMA: "true"
+
+      LDAP_REPLICATION: "true"
+      LDAP_REPLICATION_CONFIG_SYNCPROV: "binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$${LDAP_CONFIG_PASSWORD} searchbase=\"cn=config\" type=refreshAndPersist retrue=\"60 +\" timeout=1 starttls=critical"
+      LDAP_REPLICATION_DB_SYNCPROV: "binddn=\"cn=admin,$${LDAP_BASE_DN}\" bindmethod=simple credentials=$${LDAP_ADMIN_PASSWORD} searchbase=\"$${LDAP_BASE_DN}\" type=refreshAndPersist interval=00:00:00:10 retrue=\"60 +\" timeout=1 starttls=critical"
+      LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:[{% for host in ansible_play_hosts %}'ldap://{{ hostvars[host]['ansible_host'] }}'{% if not loop.last %},{% endif %}{% endfor %}]"
+
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"

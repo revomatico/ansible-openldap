@@ -1,0 +1,28 @@
+- name: Ensure ldap directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+  - "{{ ldap_dir_data }}"
+  - "{{ ldap_dir_config }}"
+
+- name: Render Docker Compose template
+  set_fact:
+      compose_template: "{{ lookup('template', 'docker-compose.yaml.j2') }}"
+
+- debug:
+    var: compose_template
+
+- name: Execute docker-compose
+  docker_compose:
+    project_name: "{{ docker_compose_project }}"
+    definition: |
+      {{ compose_template }}
+  register: output
+
+- debug:
+    var: output
+
+- assert:
+    that:
+    - "openssl.openssl_openssl_1.state.running"

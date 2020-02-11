@@ -1,0 +1,12 @@
+- hosts: controllers
+  gather_facts: no
+
+- hosts: nodes
+  pre_tasks:
+  - name: Install requirements
+    pip:
+      extra_args: -U
+      requirements: "{{ lookup('fileglob', 'requirements.pip') }}"
+  roles:
+  - openssl
+  - openldap

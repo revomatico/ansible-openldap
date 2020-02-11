@@ -1,0 +1,12 @@
+docker_compose_project: openssl
+openldap_version: 1.3.0
+ldap_port_plain: 389
+ldap_port_ssl: 636
+ldap_log_level: 3
+ldap_dir_certs: /etc/ssl/private
+ldap_dir_data: /var/lib/ldap
+ldap_dir_config: /etc/ldap/slapd.d
+ldap_organisation: myorg
+ldap_domain: myorg.com
+ldap_pass_admin: changeit
+ldap_pass_config: changeit

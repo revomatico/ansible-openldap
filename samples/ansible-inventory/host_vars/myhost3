@@ -1,0 +1,2 @@
+ansible_host: myhost1.fqdn
+ansible_port: 22

@@ -1,0 +1,24 @@
+- name: Ensure directory exists for local self-signed TLS certs
+  file:
+    path: "{{ ldap_dir_certs }}"
+    state: directory
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: "{{ ldap_dir_certs }}/key.pem"
+    backup: yes
+
+- name: Generate an OpenSSL CSR
+  openssl_csr:
+    path: "{{ ldap_dir_certs }}/{{ ansible_host }}.csr"
+    privatekey_path: "{{ ldap_dir_certs }}/key.pem"
+    common_name: "{{ ansible_host }}"
+    backup: yes
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: "{{ ldap_dir_certs}}/cert.pem"
+    privatekey_path: "{{ ldap_dir_certs}}/key.pem"
+    csr_path: "{{ ldap_dir_certs}}/{{ ansible_host }}.csr"
+    provider: selfsigned
+    backup: yes

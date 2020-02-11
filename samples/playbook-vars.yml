@@ -1,0 +1,4 @@
+ldap_organisation: MyOrg
+ldap_domain: myorg.com
+ldap_pass_admin: changeit
+ldap_pass_config: changeit
