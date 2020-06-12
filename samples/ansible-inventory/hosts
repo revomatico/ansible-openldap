@@ -6,6 +6,11 @@ all:
 controllers:
   hosts:
     controller:
+      ansible_connection: local
+
+seed_node:
+  hosts:
+    myhost1:
 
 nodes:
   hosts:

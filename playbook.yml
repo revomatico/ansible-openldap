@@ -1,5 +1,8 @@
 - hosts: controllers
   gather_facts: no
+  roles:
+  - role: openssl
+    tags: openssl
 
 - hosts: nodes
   pre_tasks:
@@ -7,6 +10,44 @@
     pip:
       extra_args: -U
       requirements: "{{ lookup('fileglob', 'requirements.pip') }}"
+  - include_vars: roles/openssl/defaults/main.yml
+  - include_vars: roles/openldap/defaults/main.yml
+  - copy:
+      src: "{{ local_ldap_dir_certs }}/{{ item }}"
+      dest: "{{ ldap_dir_certs }}/"
+    loop:
+    - ca.crt
+    - dhparam.pem
+    - server.key
+  - copy:
+      src: "{{ local_ldap_dir_certs }}/{{ ansible_host }}.crt"
+      dest: "{{ ldap_dir_certs }}/server.crt"
   roles:
-  - openssl
-  - openldap
+  - role: openldap
+    tags: openldap
+
+- hosts: seed_node
+  tasks:
+  - block:
+    - include_vars: roles/openldap/defaults/main.yml
+    - name: Wait for ldap to start
+      shell: docker exec {{ docker_compose_project }}_server_1 ldapsearch -b "{{ ldap_base_dn }}" -Y EXTERNAL -Q -H ldapi:///
+      register: ret
+      retries: "{{ ldap_wait_retries }}"
+      delay: "{{ ldap_wait_delay }}"
+      until: |
+        ret.rc == 0
+        or ret.rc == 32
+      ignore_errors: yes
+    - name: Create domain object
+      shell:
+        cmd: |
+          docker exec -i {{ docker_compose_project }}_server_1 ldapadd -D "cn=admin,{{ ldap_base_dn }}" -w {{ ldap_pass_admin }} -H ldap://localhost <<!
+          dn: {{ ldap_base_dn }}
+          objectClass: dcObject
+          objectClass: organization
+          o: {{ ldap_organisation }}
+          dc: {{ ldap_domain.split('.')[0] }}
+          !
+    when: docker_compose_command != 'down'
+    tags: seed

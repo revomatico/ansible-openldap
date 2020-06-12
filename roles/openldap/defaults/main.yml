@@ -1,12 +1,64 @@
-docker_compose_project: openssl
-openldap_version: 1.3.0
+docker_compose_project: openldap
+docker_compose_command: up -d
+
+docker_logging_max_size: 50m
+docker_logging_max_file: 5
+
+openldap_image: tiredofit/openldap
+openldap_version: 6.8.9
+
 ldap_port_plain: 389
 ldap_port_ssl: 636
-ldap_log_level: 3
-ldap_dir_certs: /etc/ssl/private
+
+ldap_log_level: 256
+
+ldap_dir_certs: /etc/ssl/ldap
 ldap_dir_data: /var/lib/ldap
 ldap_dir_config: /etc/ldap/slapd.d
+ldap_dir_backup: /var/lib/ldap-backup
 ldap_organisation: myorg
+
 ldap_domain: myorg.com
 ldap_pass_admin: changeit
 ldap_pass_config: changeit
+
+
+#### tiredofit/openldap specific settings. See https://github.com/tiredofit/docker-openldap
+## Set Open File Descriptor Limit - Default 1024
+ldap_ulimit_n: 2048
+
+## Cron expression to schedule OpenLDAP config backup. Defaults 0 4 * * * Every day at 4am.
+ldap_backup_config_cron_period: 0 4 * * *
+## Cron expression to schedule OpenLDAP data backup. Defaults 0 4 * * * Every day at 4am.
+ldap_backup_data_cron_period: 0 4 * * *
+
+## Automatically cleanup backup after how many days. Default 15
+ldap_backup_ttl: 15
+## Check RDN Parameter (ppm.so) - Default 0
+ldap_ppolicy_check_rdn: 0
+## Forbidden Characters (ppm.so) - Default ``
+ldap_ppolicy_forbidden_characters: ''
+## Maximum Consective Character Pattern - Default 0
+ldap_ppolicy_max_consec: 2
+## Minimum Digit Characters - Default 0
+ldap_ppolicy_min_digit: 1
+## Minimum Lowercase Characters - Default 0
+ldap_ppolicy_min_lower: 4
+## Minimum Points required to pass checker - Default 3
+ldap_ppolicy_min_points: 3
+## Minimum Punctuation Characters - Default 0
+ldap_ppolicy_min_punct: 1
+## Minimum Uppercase Characters - Default 0
+ldap_ppolicy_min_upper: 1
+## Use Cracklib for verifying words (ppm.so) - Default 1
+ldap_ppolicy_use_cracklib: 1
+
+## TLS cipher suite. Default ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA
+ldap_tls_cipher_suite: "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA"
+## TLS DHParam Keysize. Default 2048
+ldap_tls_dh_param_keysize: 2048
+
+ldap_debug_mode: 'false'
+
+ldap_wait_retries: 20
+ldap_wait_delay: 10

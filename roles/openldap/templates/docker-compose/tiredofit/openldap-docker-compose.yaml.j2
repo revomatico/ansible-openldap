@@ -1,0 +1,84 @@
+version: '3.7'
+
+services:
+  server:
+    image: {{ openldap_image }}:{{ openldap_version }}
+    volumes:
+    - {{ ldap_dir_data }}:/var/lib/openldap
+    - {{ ldap_dir_config }}:/etc/openldap/slapd.d
+    - {{ ldap_dir_certs }}:/assets/slapd/certs
+    - {{ _ldap_dir_backup }}:/data/backup
+    ports:
+    - "{{ ldap_port_plain }}:389"
+    - "{{ ldap_port_ssl }}:636"
+    restart: unless-stopped
+#    domainname: "{{ ansible_domain }}"
+    hostname: "{{ ansible_host }}"
+    tty: "true"
+    stdin_open: "true"
+    logging:
+      options:
+        max-size: "{{ docker_logging_max_size }}"
+        max-file: "{{ docker_logging_max_file }}"
+    environment:
+      DOMAIN: "{{ ldap_domain }}"
+      BASE_DN: "{{ ldap_base_dn }}"
+      ADMIN_PASS: "{{ ldap_pass_admin }}"
+      CONFIG_PASS: "{{ ldap_pass_config }}"
+      ORGANIZATION: "{{ ldap_organisation }}"
+      ENABLE_READONLY_USER: "false"
+      READONLY_USER_PASS: "readonlychangeme"
+
+      SCHEMA_TYPE: rfc2307bis
+      LOG_LEVEL: "{{ ldap_log_level }}"
+      ULIMIT_N: "{{ ldap_ulimit_n }}"
+
+      BACKUP_CONFIG_CRON_PERIOD: "{{ ldap_backup_config_cron_period }}"
+      BACKUP_DATA_CRON_PERIOD: "{{ ldap_backup_data_cron_period }}"
+      BACKUP_TTL: "{{ ldap_backup_ttl }}"
+
+      ## Check RDN Parameter (ppm.so) - Default 0
+      PPOLICY_CHECK_RDN: "{{ ldap_ppolicy_check_rdn }}"
+      ## Forbidden Characters (ppm.so) - Default ''
+      PPOLICY_FORBIDDEN_CHARACTERS: "{{ ldap_ppolicy_forbidden_characters }}"
+      ## Maximum Consective Character Pattern - Default 0
+      PPOLICY_MAX_CONSEC: "{{ ldap_ppolicy_max_consec }}"
+      ## Minimum Digit Characters - Default 0
+      PPOLICY_MIN_DIGIT: "{{ ldap_ppolicy_min_digit }}"
+      ## Minimum Lowercase Characters - Default 0
+      PPOLICY_MIN_LOWER: "{{ ldap_ppolicy_min_lower }}"
+      ## Minimum Points required to pass checker - Default 3
+      PPOLICY_MIN_POINTS: "{{ ldap_ppolicy_min_points }}"
+      ## Minimum Punctuation Characters - Default 0
+      PPOLICY_MIN_PUNCT: "{{ ldap_ppolicy_min_punct }}"
+      ## Minimum Uppercase Characters - Default 0
+      PPOLICY_MIN_UPPER: "{{ ldap_ppolicy_min_upper }}"
+      ## Use Cracklib for verifying words (ppm.so) - Default 1
+      PPOLICY_USE_CRACKLIB: "{{ ldap_ppolicy_use_cracklib }}"
+
+      ENABLE_TLS: "true"
+      TLS_CA_CRT_FILENAME: "ca.crt"
+      TLS_CIPHER_SUITE: "{{ ldap_tls_cipher_suite }}"
+      TLS_CRT_FILENAME: "server.crt"
+      TLS_DH_PARAM_FILENAME: "dhparam.pem"
+      TLS_DH_PARAM_KEYSIZE: "{{ ldap_tls_dh_param_keysize }}"
+      TLS_ENFORCE: "false"
+      TLS_KEY_FILENAME: "server.key"
+
+      ENABLE_REPLICATION: "true"
+      ## olcSyncRepl options used for the config database. Without rid and provider which are automatically added based on REPLICATION_HOSTS. Default binddn="cn=admin,cn=config" bindmethod=simple credentials=$CONFIG_PASS searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical
+      REPLICATION_CONFIG_SYNCPROV: binddn="cn=admin,cn=config" bindmethod=simple credentials={{ ldap_pass_config }} searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical
+      ## olcSyncRepl options used for the database. Without rid and provider which are automatically added based on REPLICATION_HOSTS. Default binddn="cn=admin,$BASE_DN" bindmethod=simple credentials=$ADMIN_PASS searchbase="$BASE_DN" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical
+      REPLICATION_DB_SYNCPROV: binddn="cn=admin,{{ ldap_base_dn }}" bindmethod=simple credentials={{ ldap_pass_admin }} searchbase="{{ ldap_base_dn }}" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical
+      ## list of replication hosts seperated by a space, must contain the current container hostname set by --hostname on docker run command. If replicating all hosts must be set in the same order. Example - ldap://ldap1.example.com ldap://ldap2.example.com ldap://ldap3.example.com
+      REPLICATION_HOSTS: "{% for host in ansible_play_hosts %}ldap://{{ hostvars[host]['ansible_host'] }}{% if not loop.last %} {% endif %}{% endfor %}"
+
+{% if ldap_slapd_args is defined %}
+      SLAPD_ARGS: "{{ ldap_slapd_args }}"
+{% endif %}
+
+      SLAPD_HOSTS: "ldap://{{ ansible_host }} ldaps://{{ ansible_host }} ldapi:///"
+
+      DEBUG_MODE: "{{ ldap_debug_mode }}"
+
+      ENABLE_ZABBIX: "false"

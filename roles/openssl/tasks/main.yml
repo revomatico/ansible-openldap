@@ -1,24 +1,66 @@
-- name: Ensure directory exists for local self-signed TLS certs
+- name: Ensure directory exists for local certificates
   file:
-    path: "{{ ldap_dir_certs }}"
+    path: "{{ local_ldap_dir_certs }}"
     state: directory
 
-- name: Generate an OpenSSL private key
+- name: Generate private keys
   openssl_privatekey:
-    path: "{{ ldap_dir_certs }}/key.pem"
+    path: "{{ local_ldap_dir_certs }}/{{ item }}.key"
     backup: yes
+  loop:
+  - "server"
+  - "ca"
 
-- name: Generate an OpenSSL CSR
+- name: Generate CA CSR
   openssl_csr:
-    path: "{{ ldap_dir_certs }}/{{ ansible_host }}.csr"
-    privatekey_path: "{{ ldap_dir_certs }}/key.pem"
-    common_name: "{{ ansible_host }}"
+    path: "{{ local_ldap_dir_certs }}/ca.csr"
+    privatekey_path: "{{ local_ldap_dir_certs }}/ca.key"
+    common_name: LDAP CA
     backup: yes
 
-- name: Generate a Self Signed OpenSSL certificate
+- name: Generate CA certificate
   openssl_certificate:
-    path: "{{ ldap_dir_certs}}/cert.pem"
-    privatekey_path: "{{ ldap_dir_certs}}/key.pem"
-    csr_path: "{{ ldap_dir_certs}}/{{ ansible_host }}.csr"
+    path: "{{ local_ldap_dir_certs }}/ca.crt"
+    privatekey_path: "{{ local_ldap_dir_certs }}/ca.key"
+    csr_path: "{{ local_ldap_dir_certs}}/ca.csr"
     provider: selfsigned
     backup: yes
+
+- name: Generate server CSR
+  openssl_csr:
+    path: "{{ local_ldap_dir_certs }}/{{ hostvars[item]['ansible_host'] }}.csr"
+    privatekey_path: "{{ local_ldap_dir_certs }}/server.key"
+    common_name: "{{ hostvars[item]['ansible_host'] }}"
+    backup: yes
+  loop: "{{ groups['nodes'] }}"
+
+- name: Sign server certificate
+  openssl_certificate:
+    path: "{{ local_ldap_dir_certs }}/{{ hostvars[item]['ansible_host'] }}.crt"
+    privatekey_path: "{{ local_ldap_dir_certs }}/server.key"
+    csr_path: "{{ local_ldap_dir_certs}}/{{ hostvars[item]['ansible_host'] }}.csr"
+    provider: ownca
+    ownca_path: "{{ local_ldap_dir_certs }}/ca.crt"
+    ownca_privatekey_path: "{{ local_ldap_dir_certs }}/ca.key"
+    backup: yes
+  loop: "{{ groups['nodes'] }}"
+
+- name: Generate Diffie-Hellman parameters
+  openssl_dhparam:
+    path: "{{ local_ldap_dir_certs }}/dhparam.pem"
+    size: "{{ ldap_tls_dh_param_keysize }}"
+    backup: yes
+
+- name: Set appropriate permissions
+  file:
+    path: "{{ local_ldap_dir_certs}}/{{ item }}"
+    state: touch
+    mode: u+rw,g-rwx,o-rwx
+    modification_time: preserve
+    access_time: preserve
+  loop:
+  - server.key
+  - server.crt
+  - ca.key
+  - ca.crt
+  - dhparam.pem
