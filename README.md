@@ -1,6 +1,3 @@
-this project is work in progress!!!!!!!!!!!!!
-
-
 # Ansible playbook to automate OpenLDAP deployment
 
 - Developed and used with Ansible 2.8 on Ubuntu 18.04
