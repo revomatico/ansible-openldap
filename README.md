@@ -7,7 +7,7 @@
 - In containers, using Docker Compose
 
 ## OpenLDAP variants
-- Default: [tiredofit/openldap](https://hub.docker.com/r/tiredofit/openldap} image.
+- Default: [tiredofit/openldap](https://hub.docker.com/r/tiredofit/openldap) image.
 - Can use [osixia/openldap](https://hub.docker.com/r/osixia/openldap) as well, but did not appear to work properly with self generated certificates.
     - set: `openldap_image: osixia/openldap`
     - set: `openldap_version` to desired version
