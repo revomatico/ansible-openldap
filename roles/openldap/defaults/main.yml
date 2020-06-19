@@ -5,12 +5,15 @@ docker_logging_max_size: 50m
 docker_logging_max_file: 5
 
 openldap_image: tiredofit/openldap
-openldap_version: 6.8.9
+openldap_version: 6.9.2
 
 ldap_port_plain: 389
 ldap_port_ssl: 636
 
 ldap_log_level: 256
+
+ldap_wait_retries: 20
+ldap_wait_delay: 10
 
 ldap_dir_certs: /etc/ssl/ldap
 ldap_dir_data: /var/lib/ldap
@@ -59,6 +62,3 @@ ldap_tls_cipher_suite: "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:
 ldap_tls_dh_param_keysize: 2048
 
 ldap_debug_mode: 'false'
-
-ldap_wait_retries: 20
-ldap_wait_delay: 10
