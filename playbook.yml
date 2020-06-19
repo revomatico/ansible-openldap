@@ -49,5 +49,6 @@
           o: {{ ldap_organisation }}
           dc: {{ ldap_domain.split('.')[0] }}
           !
+      ignore_errors: yes
     when: docker_compose_command != 'down'
     tags: seed

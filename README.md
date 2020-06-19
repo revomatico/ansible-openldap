@@ -6,6 +6,7 @@
 ## Features
 - Deploy N-Way multi master replication
 - In containers, using Docker Compose
+- Generates a custom CA and server certificates for each nodes, signed by this CA.
 
 
 ## OpenLDAP variants
@@ -29,6 +30,10 @@
 - [ ] Automatically load ldif files (with whatever data) in LDAP after deployment
 
 
+## Current issues
+- Password policy (using [ppm.so](https://github.com/ltb-project/ppm)) does not seem to work at the moment, it is simply ignored?!
+
+
 ## Alternatives
 - https://github.com/osixia/docker-openldap
 - https://github.com/debops/debops/tree/master/ansible/roles/slapd
@@ -37,59 +42,59 @@
 ## Variables
 ### Playbook specific
 
-| Variable                          | Default              | Description                                                                                           |
-|-----------------------------------|----------------------|-------------------------------------------------------------------------------------------------------|
-| docker_compose_project            | openldap             | Docker compose project name (docker-compose -p)                                                       |
-| docker_compose_command            | up -d                | Default docker-compose command. Use `-e docker_compose_command=down` for example to remove deployment |
-| docker_logging_max_size           | 50m                  | Maximum docker log file size                                                                          |
-| docker_logging_max_file           | 5                    | Maximum docker log files before recycling                                                             |
+| Variable                          | Default                | Description                                                                                           |
+|-----------------------------------|------------------------|-------------------------------------------------------------------------------------------------------|
+| docker_compose_project            | `openldap`             | Docker compose project name (docker-compose -p)                                                       |
+| docker_compose_command            | `up -d`                | Default docker-compose command. Use `-e docker_compose_command=down` for example to remove deployment |
+| docker_logging_max_size           | `50m`                  | Maximum docker log file size                                                                          |
+| docker_logging_max_file           | `5`                    | Maximum docker log files before recycling                                                             |
 | |
-| openldap_image                    | tiredofit/openldap   | Base docker image. At the moment, "tiredofit" release seems to be working better than oxisia one      |
-| openldap_version                  | 6.9.2                | Docker image tag                                                                                      |
+| openldap_image                    | `tiredofit/openldap`   | Base docker image. At the moment, [tiredofit](https://hub.docker.com/r/tiredofit/openldap) release seems to be working better than oxisia one      |
+| openldap_version                  | `6.9.2`                | Docker image tag                                                                                      |
 | |
-| ldap_port_plain                   | 389                  | Plain ldap port                                                                                       |
-| ldap_port_ssl                     | 636                  | TLS ldap port                                                                                         |
+| ldap_port_plain                   | `389`                  | Plain ldap port                                                                                       |
+| ldap_port_ssl                     | `636`                  | TLS ldap port                                                                                         |
 | |
-| ldap_log_level                    | 256                  | See *loglevel* in https://www.openldap.org/doc/admin24/slapdconfig.html                               |
+| ldap_log_level                    | `256`                  | See *loglevel* in https://www.openldap.org/doc/admin24/slapdconfig.html                               |
 | |
-| ldap_dir_certs                    | /etc/ssl/ldap        | Host directory to persist TLS certificates                                                            |
-| ldap_dir_data                     | /var/lib/ldap        | Host directory to persist ldap data                                                                   |
-| ldap_dir_config                   | /etc/ldap/slapd.d    | Host directory to persist ldap configuration                                                          |
-| ldap_dir_backup                   | /var/lib/ldap-backup | Host directory to persist scheduled dumps                                                             |
+| ldap_dir_certs                    | `/etc/ssl/ldap`        | Host directory to persist TLS certificates                                                            |
+| ldap_dir_data                     | `/var/lib/ldap`        | Host directory to persist ldap data                                                                   |
+| ldap_dir_config                   | `/etc/ldap/slapd.d`    | Host directory to persist ldap configuration                                                          |
+| ldap_dir_backup                   | `/var/lib/ldap-backup` | Host directory to persist scheduled dumps                                                             |
 | |
-| ldap_organisation                 | myorg                | Global name of the organization                                                                       |
-| ldap_domain                       | myorg.com            | LDAP domain (base_dn will be deducted from this)                                                      |
-| ldap_pass_admin                   | changeit             | *admin* super user password                                                                           |
-| ldap_pass_config                  | changeit             | *config* super user password                                                                          |
+| ldap_organisation                 | `myorg`                | Global name of the organization                                                                       |
+| ldap_domain                       | `myorg.com`            | LDAP domain (base_dn will be deducted from this)                                                      |
+| ldap_pass_admin                   | `changeit`             | *admin* super user password                                                                           |
+| ldap_pass_config                  | `changeit`             | *config* super user password                                                                          |
 | |
-| ldap_wait_retries                 | 20                   | How many retries before ansible gives up                                                              |
-| ldap_wait_delay                   | 10                   | How many seconds does ansible wait before retrying                                                    |
+| ldap_wait_retries                 | `20`                   | How many retries before ansible gives up                                                              |
+| ldap_wait_delay                   | `10`                   | How many seconds does ansible wait before retrying                                                    |
 
 ### tiredofit/openldap specific
 > See https://github.com/tiredofit/docker-openldap
 
-| Variable                          | Default              | Description                                                           |
-|-----------------------------------|----------------------|-----------------------------------------------------------------------|
-| ldap_ulimit_n                     | 2048                 | Set Open File Descriptor Limit                                        |
+| Variable                          | Default     | Description                                                           |
+|-----------------------------------|-------------|-----------------------------------------------------------------------|
+| ldap_ulimit_n                     | `2048`      | Set Open File Descriptor Limit                                        |
 | |
-| ldap_backup_config_cron_period    | 0 4 * * *            | Cron expression to schedule OpenLDAP config backup                    |
-| ldap_backup_data_cron_period      | 0 4 * * *            | Cron expression to schedule OpenLDAP data backup                      |
-| ldap_backup_ttl                   | 15                   | Automatically cleanup backup after how many days                      |
+| ldap_backup_config_cron_period    | `0 4 * * *` | Cron expression to schedule OpenLDAP config backup                    |
+| ldap_backup_data_cron_period      | `0 4 * * *` | Cron expression to schedule OpenLDAP data backup                      |
+| ldap_backup_ttl                   | `15`        | Automatically cleanup backup after how many days                      |
 | |
-| ldap_ppolicy_check_rdn            | 0                    | Check RDN Parameter (ppm.so - see https://github.com/ltb-project/ppm) |
-| ldap_ppolicy_forbidden_characters | ''                   | Forbidden Characters (ppm.so)                                         |
-| ldap_ppolicy_max_consec           | 2                    | Maximum Consective Character Pattern                                  |
-| ldap_ppolicy_min_digit            | 1                    | Minimum Digit Characters                                              |
-| ldap_ppolicy_min_lower            | 4                    | Minimum Lowercase Characters                                          |
-| ldap_ppolicy_min_points           | 3                    | Minimum Points required to pass checker                               |
-| ldap_ppolicy_min_punct            | 1                    | Minimum Punctuation Characters                                        |
-| ldap_ppolicy_min_upper            | 1                    | Minimum Uppercase Characters                                          |
-| ldap_ppolicy_use_cracklib         | 1                    | Use Cracklib for verifying words (ppm.so)                             |
+| ldap_ppolicy_check_rdn            | `0`         | Check RDN Parameter (ppm.so - see https://github.com/ltb-project/ppm) |
+| ldap_ppolicy_forbidden_characters | `''`        | Forbidden Characters (ppm.so)                                         |
+| ldap_ppolicy_max_consec           | `2`         | Maximum Consective Character Pattern                                  |
+| ldap_ppolicy_min_digit            | `1`         | Minimum Digit Characters                                              |
+| ldap_ppolicy_min_lower            | `4`         | Minimum Lowercase Characters                                          |
+| ldap_ppolicy_min_points           | `3`         | Minimum Points required to pass checker                               |
+| ldap_ppolicy_min_punct            | `1`         | Minimum Punctuation Characters                                        |
+| ldap_ppolicy_min_upper            | `1`         | Minimum Uppercase Characters                                          |
+| ldap_ppolicy_use_cracklib         | `1`         | Use Cracklib for verifying words (ppm.so)                             |
 | |
-| ldap_tls_cipher_suite             | ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA | TLS cipher suite |
-| ldap_tls_dh_param_keysize         | 2048                 | TLS DHParam Keysize                                                   |
+| ldap_tls_cipher_suite             |             | TLS cipher suite. Defualt: `ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA` |
+| ldap_tls_dh_param_keysize         | `2048`      | TLS DHParam Keysize                                                   |
 | |
-| ldap_debug_mode                   | 'false'              | Enable debug (dumps to ouput script output, etc)                      |
+| ldap_debug_mode                   | 'false'     | Enable debug (dumps to ouput script output, etc)                      |
 
 
 ## Changelog
