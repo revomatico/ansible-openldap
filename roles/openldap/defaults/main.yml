@@ -62,3 +62,5 @@ ldap_tls_cipher_suite: "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:
 ldap_tls_dh_param_keysize: 2048
 
 ldap_debug_mode: 'false'
+
+ldap_enable_zabbix: 'false'

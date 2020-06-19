@@ -35,7 +35,6 @@
 
 
 ## Alternatives
-- https://github.com/osixia/docker-openldap
 - https://github.com/debops/debops/tree/master/ansible/roles/slapd
 
 
@@ -91,15 +90,18 @@
 | ldap_ppolicy_min_upper            | `1`         | Minimum Uppercase Characters                                          |
 | ldap_ppolicy_use_cracklib         | `1`         | Use Cracklib for verifying words (ppm.so)                             |
 | |
-| ldap_tls_cipher_suite             |             | TLS cipher suite. Defualt: `ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA` |
+| ldap_tls_cipher_suite             |             | TLS cipher suite. Default: `ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA` |
 | ldap_tls_dh_param_keysize         | `2048`      | TLS DHParam Keysize                                                   |
 | |
-| ldap_debug_mode                   | 'false'     | Enable debug (dumps to ouput script output, etc)                      |
+| ldap_debug_mode                   | `'false'`   | Enable debug (dumps to ouput script output, etc)                      |
+| |
+| ldap_enable_zabbix                | `'false'`   | Enable zabbix monitoring agent                                        |
 
 
 ## Changelog
-- [2020-06-19] v0.0.3
+- [2020-06-19] v0.0.4
   - Bump tiredofit/openldap version to 6.9.2
+  - Update README
 - [2020-06-12] v0.0.2
   - Replaced `oxisia` release with `tiredofit` release of OpenLDAP
 - [2020-02-11] v0.0.1
