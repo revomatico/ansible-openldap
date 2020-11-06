@@ -65,7 +65,6 @@ services:
       TLS_KEY_FILENAME: "server.key"
       TLS_CREATE_CA: "false"
       TLS_CA_CRT_PATH: "/certs"
-      TLS_VERIFY_CLIENT: "demand"
 
       ENABLE_REPLICATION: "true"
       ## olcSyncRepl options used for the config database. Without rid and provider which are automatically added based on REPLICATION_HOSTS. Default binddn="cn=admin,cn=config" bindmethod=simple credentials=$CONFIG_PASS searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical
