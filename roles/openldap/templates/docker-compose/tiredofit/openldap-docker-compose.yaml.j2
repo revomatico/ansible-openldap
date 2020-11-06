@@ -6,7 +6,7 @@ services:
     volumes:
     - {{ ldap_dir_data }}:/var/lib/openldap
     - {{ ldap_dir_config }}:/etc/openldap/slapd.d
-    - {{ ldap_dir_certs }}:/assets/slapd/certs
+    - {{ ldap_dir_certs }}:/certs
     - {{ _ldap_dir_backup }}:/data/backup
     ports:
     - "{{ ldap_port_plain }}:389"
@@ -61,9 +61,11 @@ services:
       TLS_CIPHER_SUITE: "{{ ldap_tls_cipher_suite }}"
       TLS_CRT_FILENAME: "server.crt"
       TLS_DH_PARAM_FILENAME: "dhparam.pem"
-      TLS_DH_PARAM_KEYSIZE: "{{ ldap_tls_dh_param_keysize }}"
       TLS_ENFORCE: "false"
       TLS_KEY_FILENAME: "server.key"
+      TLS_CREATE_CA: "false"
+      TLS_CA_CRT_PATH: "/certs"
+      TLS_VERIFY_CLIENT: "demand"
 
       ENABLE_REPLICATION: "true"
       ## olcSyncRepl options used for the config database. Without rid and provider which are automatically added based on REPLICATION_HOSTS. Default binddn="cn=admin,cn=config" bindmethod=simple credentials=$CONFIG_PASS searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical
@@ -82,3 +84,9 @@ services:
       DEBUG_MODE: "{{ ldap_debug_mode }}"
 
       ENABLE_ZABBIX: "{{ ldap_enable_zabbix }}"
+    extra_hosts:
+{% for host in ansible_play_hosts %}
+{% if hostvars[host]['ansible_host'] != ansible_host %}
+    - {{ hostvars[host]['ansible_host'] }}:{{ hostvars[host]['ip'] }}
+{% endif %}
+{% endfor %}

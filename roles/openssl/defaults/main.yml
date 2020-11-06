@@ -1,2 +1,4 @@
 local_ldap_dir_certs: /etc/ssl/private
-ldap_tls_dh_param_keysize: 2048
+force_generate: no
+ldap_tls_keysize: 2048
+ldap_ca_subject: LDAP CA

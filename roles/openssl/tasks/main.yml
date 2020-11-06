@@ -2,11 +2,14 @@
   file:
     path: "{{ local_ldap_dir_certs }}"
     state: directory
+    owner: 389
+    group: 389
 
 - name: Generate private keys
   openssl_privatekey:
     path: "{{ local_ldap_dir_certs }}/{{ item }}.key"
     backup: yes
+    force: "{{ force_generate }}"
   loop:
   - "server"
   - "ca"
@@ -15,8 +18,16 @@
   openssl_csr:
     path: "{{ local_ldap_dir_certs }}/ca.csr"
     privatekey_path: "{{ local_ldap_dir_certs }}/ca.key"
-    common_name: LDAP CA
+    common_name: "{{ ldap_ca_subject }}"
+    key_usage:
+    - digitalSignature
+    - keyEncipherment
+    - keyCertSign
+    extended_key_usage:
+    - clientAuth
+    - serverAuth
     backup: yes
+    force: "{{ force_generate }}"
 
 - name: Generate CA certificate
   openssl_certificate:
@@ -25,6 +36,7 @@
     csr_path: "{{ local_ldap_dir_certs}}/ca.csr"
     provider: selfsigned
     backup: yes
+    force: "{{ force_generate }}"
 
 - name: Generate server CSR
   openssl_csr:
@@ -32,6 +44,7 @@
     privatekey_path: "{{ local_ldap_dir_certs }}/server.key"
     common_name: "{{ hostvars[item]['ansible_host'] }}"
     backup: yes
+    force: "{{ force_generate }}"
   loop: "{{ groups['nodes'] }}"
 
 - name: Sign server certificate
@@ -43,13 +56,15 @@
     ownca_path: "{{ local_ldap_dir_certs }}/ca.crt"
     ownca_privatekey_path: "{{ local_ldap_dir_certs }}/ca.key"
     backup: yes
+    force: "{{ force_generate }}"
   loop: "{{ groups['nodes'] }}"
 
 - name: Generate Diffie-Hellman parameters
   openssl_dhparam:
     path: "{{ local_ldap_dir_certs }}/dhparam.pem"
-    size: "{{ ldap_tls_dh_param_keysize }}"
+    size: "{{ ldap_tls_keysize }}"
     backup: yes
+    force: "{{ force_generate }}"
 
 - name: Set appropriate permissions
   file:

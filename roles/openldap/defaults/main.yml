@@ -58,8 +58,6 @@ ldap_ppolicy_use_cracklib: 1
 
 ## TLS cipher suite. Default ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA
 ldap_tls_cipher_suite: "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:-DHE-DSS:-RSA:!aNULL:!MD5:!DSS:!SHA"
-## TLS DHParam Keysize. Default 2048
-ldap_tls_dh_param_keysize: 2048
 
 ldap_debug_mode: 'false'
 

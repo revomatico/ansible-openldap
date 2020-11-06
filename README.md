@@ -19,6 +19,7 @@
 ## Usage
 - Copy directory `samples/ansible-inventory` to the project root
 - Edit `hosts` and `host_vars` to your needs
+    - `ip` is needed in host_vars to force /etc/hosts in container, avoiding name resolve issues
 - Create a `playbook-vars.yml` file, using the [sample](samples/playbook-vars.yml) as inspiration
 - Deploy: `./run-playbook.sh`
 - Remove: `./run-playbook.sh -e docker_compose_command=down`
@@ -49,7 +50,7 @@
 | docker_logging_max_file           | `5`                    | Maximum docker log files before recycling                                                             |
 | |
 | openldap_image                    | `tiredofit/openldap`   | Base docker image. At the moment, [tiredofit](https://hub.docker.com/r/tiredofit/openldap) release seems to be working better than oxisia one      |
-| openldap_version                  | `6.9.2`                | Docker image tag                                                                                      |
+| openldap_version                  | `7.1.5`                | Docker image tag                                                                                      |
 | |
 | ldap_port_plain                   | `389`                  | Plain ldap port                                                                                       |
 | ldap_port_ssl                     | `636`                  | TLS ldap port                                                                                         |

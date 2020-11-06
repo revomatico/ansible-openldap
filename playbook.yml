@@ -15,6 +15,8 @@
   - copy:
       src: "{{ local_ldap_dir_certs }}/{{ item }}"
       dest: "{{ ldap_dir_certs }}/"
+      owner: 389
+      group: 389
     loop:
     - ca.crt
     - dhparam.pem
@@ -22,6 +24,8 @@
   - copy:
       src: "{{ local_ldap_dir_certs }}/{{ ansible_host }}.crt"
       dest: "{{ ldap_dir_certs }}/server.crt"
+      owner: 389
+      group: 389
   roles:
   - role: openldap
     tags: openldap
