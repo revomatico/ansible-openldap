@@ -5,7 +5,7 @@ docker_logging_max_size: 50m
 docker_logging_max_file: 5
 
 openldap_image: tiredofit/openldap
-openldap_version: 6.9.2
+openldap_version: 7.1.5
 
 ldap_port_plain: 389
 ldap_port_ssl: 636

@@ -99,6 +99,9 @@
 
 
 ## Changelog
+- [2020-11-06] v0.0.5
+  - Bump tiredofit/openldap version to 7.1.5
+  - add missing pip dependency: docker-compose
 - [2020-06-19] v0.0.4
   - Bump tiredofit/openldap version to 6.9.2
   - Update README
